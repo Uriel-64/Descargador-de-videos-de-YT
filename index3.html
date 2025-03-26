@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YT Downloader | Descarga videos de YouTube</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ff0000;
+            --primary-dark: #cc0000;
+            --secondary: #282828;
+            --light: #f5f5f5;
+            --dark: #222;
+            --gray: #888;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f9f9f9;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: white;
+        }
+        
+        .download-box {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .input-group input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #eee;
+            border-radius: 5px 0 0 5px;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.3s;
+        }
+        
+        .input-group input:focus {
+            border-color: var(--primary);
+        }
+        
+        .input-group button {
+            padding: 0 25px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .input-group button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .video-info {
+            display: none;
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .video-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .thumbnail-container {
+            flex: 0 0 300px;
+        }
+        
+        .thumbnail {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .details {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .details h2 {
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+        
+        .meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        .meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .formats {
+            margin-top: 20px;
+        }
+        
+        .formats h3 {
+            margin-bottom: 15px;
+            color: var(--secondary);
+        }
+        
+        .format-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        .format-btn {
+            padding: 12px;
+            background: white;
+            border: 2px solid #eee;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.3s;
+        }
+        
+        .format-btn:hover {
+            border-color: var(--primary);
+            background: rgba(255, 0, 0, 0.05);
+        }
+        
+        .format-btn .quality {
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .format-btn .type {
+            color: var(--gray);
+            font-size: 0.8rem;
+        }
+        
+        .progress-container {
+            display: none;
+            margin-top: 30px;
+            background: #f5f5f5;
+            border-radius: 5px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), #ff6b6b);
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+        
+        .progress-text {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .result {
+            display: none;
+            margin-top: 30px;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .download-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 15px 30px;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .download-link:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .input-group {
+                flex-direction: column;
+            }
+            
+            .input-group input {
+                border-radius: 5px;
+                margin-bottom: 10px;
+            }
+            
+            .input-group button {
+                border-radius: 5px;
+                padding: 15px;
+            }
+            
+            .video-container {
+                flex-direction: column;
+            }
+            
+            .thumbnail-container {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fab fa-youtube"></i>
+            </div>
+            <h1>YT Downloader</h1>
+            <p>Descarga videos de YouTube en alta calidad</p>
+        </header>
+        
+        <div class="download-box">
+            <div class="input-group">
+                <input type="text" id="url" placeholder="Pega aquí el enlace de YouTube...">
+                <button id="download-btn">
+                    <i class="fas fa-download"></i> Descargar
+                </button>
+            </div>
+            
+            <div id="video-info" class="video-info">
+                <div class="video-container">
+                    <div class="thumbnail-container">
+                        <img id="thumbnail" class="thumbnail" src="" alt="Miniatura del video">
+                    </div>
+                    <div class="details">
+                        <h2 id="video-title">Título del video</h2>
+                        <div class="meta">
+                            <span><i class="fas fa-eye"></i> <span id="views">0</span> vistas</span>
+                            <span><i class="far fa-clock"></i> <span id="duration">0:00</span></span>
+                            <span><i class="far fa-calendar-alt"></i> <span id="date">Fecha</span></span>
+                        </div>
+                        <p id="description">Descripción del video...</p>
+                    </div>
+                </div>
+                
+                <div class="formats">
+                    <h3>Formatos disponibles</h3>
+                    <div id="formats-container" class="format-grid">
+                        <!-- Los formatos se agregarán dinámicamente aquí -->
+                    </div>
+                </div>
+            </div>
+            
+            <div id="progress-container" class="progress-container">
+                <h3>Descargando video...</h3>
+                <div class="progress-bar">
+                    <div id="progress" class="progress"></div>
+                </div>
+                <p id="progress-text" class="progress-text">0% completado</p>
+            </div>
+            
+            <div id="result" class="result">
+                <h3><i class="fas fa-check-circle"></i> ¡Descarga lista!</h3>
+                <p>Tu video se ha descargado correctamente.</p>
+                <a id="download-link" class="download-link" href="#" download>
+                    <i class="fas fa-download"></i> Guardar video
+                </a>
+            </div>
+        </div>
+        
+        <footer>
+            <p>YT Downloader &copy; 2023 - Para uso educativo solamente</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const downloadBtn = document.getElementById('download-btn');
+            const urlInput = document.getElementById('url');
+            const videoInfo = document.getElementById('video-info');
+            const progressContainer = document.getElementById('progress-container');
+            const result = document.getElementById('result');
+            const progress = document.getElementById('progress');
+            const progressText = document.getElementById('progress-text');
+            const downloadLink = document.getElementById('download-link');
+            
+            downloadBtn.addEventListener('click', function() {
+                const url = urlInput.value.trim();
+                
+                if (!url) {
+                    alert('Por favor ingresa una URL de YouTube');
+                    return;
+                }
+                
+                if (!isValidYouTubeUrl(url)) {
+                    alert('La URL ingresada no es válida. Por favor ingresa un enlace de YouTube válido.');
+                    return;
+                }
+                
+                // Simular obtención de información del video
+                fetchVideoInfo(url);
+            });
+            
+            function fetchVideoInfo(url) {
+                // Mostrar estado de carga
+                videoInfo.style.display = 'none';
+                progressContainer.style.display = 'none';
+                result.style.display = 'none';
+                
+                // Simulación de API (en un caso real harías una llamada a tu backend)
+                setTimeout(() => {
+                    const videoId = getVideoId(url);
+                    
+                    // Datos simulados del video
+                    const videoData = {
+                        title: "Video de ejemplo de YouTube",
+                        thumbnail: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+                        views: "1,234,567",
+                        duration: "10:30",
+                        date: "15 Mar 2023",
+                        description: "Este es un ejemplo de descripción de video. En una implementación real, aquí aparecería la descripción real del video de YouTube.",
+                        formats: [
+                            { quality: "1080p", type: "MP4", size: "125MB" },
+                            { quality: "720p", type: "MP4", size: "85MB" },
+                            { quality: "480p", type: "MP4", size: "45MB" },
+                            { quality: "360p", type: "MP4", size: "25MB" },
+                            { quality: "Audio", type: "MP3", size: "12MB" }
+                        ]
+                    };
+                    
+                    // Mostrar información del video
+                    document.getElementById('video-title').textContent = videoData.title;
+                    document.getElementById('thumbnail').src = videoData.thumbnail;
+                    document.getElementById('views').textContent = videoData.views;
+                    document.getElementById('duration').textContent = videoData.duration;
+                    document.getElementById('date').textContent = videoData.date;
+                    document.getElementById('description').textContent = videoData.description;
+                    
+                    // Mostrar formatos disponibles
+                    const formatsContainer = document.getElementById('formats-container');
+                    formatsContainer.innerHTML = '';
+                    
+                    videoData.formats.forEach(format => {
+                        const formatBtn = document.createElement('button');
+                        formatBtn.className = 'format-btn';
+                        formatBtn.innerHTML = `
+                            <div class="quality">${format.quality}</div>
+                            <div class="type">${format.type} • ${format.size}</div>
+                        `;
+                        
+                        formatBtn.addEventListener('click', () => {
+                            startDownload(format.quality);
+                        });
+                        
+                        formatsContainer.appendChild(formatBtn);
+                    });
+                    
+                    videoInfo.style.display = 'block';
+                }, 1000);
+            }
+            
+            function startDownload(quality) {
+                videoInfo.style.display = 'none';
+                progressContainer.style.display = 'block';
+                result.style.display = 'none';
+                
+                // Simular progreso de descarga
+                let progressValue = 0;
+                const interval = setInterval(() => {
+                    progressValue += Math.random() * 10;
+                    if (progressValue > 100) progressValue = 100;
+                    
+                    progress.style.width = `${progressValue}%`;
+                    progressText.textContent = `${Math.round(progressValue)}% completado`;
+                    
+                    if (progressValue === 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            progressContainer.style.display = 'none';
+                            result.style.display = 'block';
+                            
+                            // En una implementación real, aquí pondrías el enlace real de descarga
+                            downloadLink.href = "#";
+                            downloadLink.setAttribute('download', `youtube_video_${quality}.mp4`);
+                        }, 500);
+                    }
+                }, 300);
+            }
+            
+            function isValidYouTubeUrl(url) {
+                const pattern = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/;
+                return pattern.test(url);
+            }
+            
+            function getVideoId(url) {
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                const match = url.match(regExp);
+                return (match && match[2].length === 11) ? match[2] : null;
+            }
+        });
+    </script>
+</body>
+</html>
